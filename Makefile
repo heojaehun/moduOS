@@ -11,6 +11,8 @@ LINKER_SCRIPT = ./moduOS.ld
 ASM_SRCS = $(wildcard boot/*.s)
 ASM_OBJS = $(patsubst boot/%.s, build/%.o, $(ASM_SRCS))
 
+INC_DIRS = include
+
 moduOS = build/moduOS.axf
 moduOS_bin = build/moduOS.bin
 
@@ -36,4 +38,4 @@ $(moduOS): $(ASM_OBJS) $(LINKER_SCRIPT)
 
 build/%.o: boot/%.s
 	mkdir -p $(shell dirname $@)
-	$(AS) -march=$(ARCH) -mcpu=$(MCPU) -g -o $@ $<
+	$(CC) -march=$(ARCH) -mcpu=$(MCPU) -I $(INC_DIRS) -g -o $@ $<
