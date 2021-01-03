@@ -8,8 +8,8 @@ OC = arm-none-eabi-objcopy
 
 LINKER_SCRIPT = ./moduOS.ld
 
-ASM_SRCS = $(wildcard boot/*.s)
-ASM_OBJS = $(patsubst boot/%.s, build/%.o, $(ASM_SRCS))
+ASM_SRCS = $(wildcard boot/*.S)
+ASM_OBJS = $(patsubst boot/%.S, build/%.o, $(ASM_SRCS))
 
 INC_DIRS = include
 
@@ -36,6 +36,7 @@ $(moduOS): $(ASM_OBJS) $(LINKER_SCRIPT)
 	$(LD) -n -T $(LINKER_SCRIPT) -o $(moduOS) $(ASM_OBJS)
 	$(OC) -O binary $(moduOS) $(moduOS_bin)
 
-build/%.o: boot/%.s
+build/%.o: boot/%.S
 	mkdir -p $(shell dirname $@)
-	$(CC) -march=$(ARCH) -mcpu=$(MCPU) -I $(INC_DIRS) -g -o $@ $<
+	#$(CC) -mcpu=$(MCPU) -I$(INC_DIRS) -c -g -o $@ $<
+	$(CC) -march=$(ARCH) -mcpu=$(MCPU) -I$(INC_DIRS) -c -g -o $@ $<

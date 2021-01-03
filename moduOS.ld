@@ -6,7 +6,7 @@ SECTIONS
     .text :
     {
         *(vector_start)
-        *(.text.rodata)
+        *(.text .rodata)
     }
     .data :
     {

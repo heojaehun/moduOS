@@ -29,7 +29,7 @@
   reset_handler:
     MRS r0, cpsr
     BIC r1, r0, #0x1F
-    ORR r1, r1, #ARM_MODE_BIT_SVC
+    ORR r1, r1, #ARM_MODE_BIT_SVC 
     MSR cpsr, r1
     LDR sp, =SVC_STACK_TOP
 
@@ -61,7 +61,7 @@
     BIC r1, r0, #0x1F
     ORR r1, r1, #ARM_MODE_BIT_SYS
     MSR cpsr, r1
-    LDR sp, =SYS_STACK_TOP
+    LDR sp, =USRSYS_STACK_TOP
 
   dummy_handler:
     B   .
