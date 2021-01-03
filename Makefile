@@ -7,9 +7,13 @@ LD = arm-none-eabi-ld
 OC = arm-none-eabi-objcopy
 
 LINKER_SCRIPT = ./moduOS.ld
+MAP_FILE = build/moduOS.map
 
 ASM_SRCS = $(wildcard boot/*.S)
-ASM_OBJS = $(patsubst boot/%.S, build/%.o, $(ASM_SRCS))
+ASM_OBJS = $(patsubst boot/%.S, build/%.os, $(ASM_SRCS))
+
+C_SRCS = $(wildcard boot/*.c)
+C_OBJS = $(patsubst boot/%.c, build/%.o, $(C_SRCS))
 
 INC_DIRS = include
 
@@ -32,11 +36,14 @@ debug: $(moduOS)
 gdb:
 	gdb-multiarch
 
-$(moduOS): $(ASM_OBJS) $(LINKER_SCRIPT)
-	$(LD) -n -T $(LINKER_SCRIPT) -o $(moduOS) $(ASM_OBJS)
+$(moduOS): $(ASM_OBJS) $(C_OBJS) $(LINKER_SCRIPT)
+	$(LD) -n -T $(LINKER_SCRIPT) -o $(moduOS) $(ASM_OBJS) $(C_OBJS) -Map=$(MAP_FILE)
 	$(OC) -O binary $(moduOS) $(moduOS_bin)
 
-build/%.o: boot/%.S
+build/%.os: $(ASM_SRCS) 
 	mkdir -p $(shell dirname $@)
-	#$(CC) -mcpu=$(MCPU) -I$(INC_DIRS) -c -g -o $@ $<
+	$(CC) -march=$(ARCH) -mcpu=$(MCPU) -I$(INC_DIRS) -c -g -o $@ $<
+
+build/%.o: $(C_SRCS) 
+	mkdir -p $(shell dirname $@)
 	$(CC) -march=$(ARCH) -mcpu=$(MCPU) -I$(INC_DIRS) -c -g -o $@ $<
