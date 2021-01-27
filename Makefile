@@ -5,7 +5,7 @@ TARGET = rvpb
 
 CC = arm-none-eabi-gcc
 AS = arm-none-eabi-as
-LD = arm-none-eabi-ld
+LD = arm-none-eabi-gcc
 OC = arm-none-eabi-objcopy
 
 LINKER_SCRIPT = ./moduOS.ld
@@ -30,6 +30,8 @@ INC_DIRS  = -I include			\
 
 CFLAGS = -c -g -std=c11
 
+LDFLAGS = -nostartfiles -nostdlib -nodefaultlibs -static -lgcc
+
 moduOS = build/moduOS.axf
 moduOS_bin = build/moduOS.bin
 
@@ -50,7 +52,7 @@ gdb:
 	gdb-multiarch
 
 $(moduOS): $(ASM_OBJS) $(C_OBJS) $(LINKER_SCRIPT)
-	$(LD) -n -T $(LINKER_SCRIPT) -o $(moduOS) $(ASM_OBJS) $(C_OBJS) -Map=$(MAP_FILE)
+	$(LD) -n -T $(LINKER_SCRIPT) -o $(moduOS) $(ASM_OBJS) $(C_OBJS) -Wl,-Map=$(MAP_FILE) $(LDFLAGS)
 	$(OC) -O binary $(moduOS) $(moduOS_bin)
 
 build/%.os: %.S 
