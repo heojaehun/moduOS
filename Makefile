@@ -1,6 +1,8 @@
 ARCH = armv7-a
 MCPU = cortex-a8
 
+TARGET = rvpb
+
 CC = arm-none-eabi-gcc
 AS = arm-none-eabi-as
 LD = arm-none-eabi-ld
@@ -12,10 +14,18 @@ MAP_FILE = build/moduOS.map
 ASM_SRCS = $(wildcard boot/*.S)
 ASM_OBJS = $(patsubst boot/%.S, build/%.os, $(ASM_SRCS))
 
-C_SRCS = $(wildcard boot/*.c)
-C_OBJS = $(patsubst boot/%.c, build/%.o, $(C_SRCS))
+VPATH = boot \
+		hal/$(TARGET)
 
-INC_DIRS = include
+C_SRCS  = $(notdir $(wildcard boot/*.c))
+C_SRCS += $(notdir $(wildcard hal/$(TARGET)/*.c))
+C_OBJS = $(patsubst %.c, build/%.o, $(C_SRCS))
+
+INC_DIRS  = -I include		\
+			-I hal			\
+			-I hal/$(TARGET)
+
+CFLAGS = -c -g -std=c11
 
 moduOS = build/moduOS.axf
 moduOS_bin = build/moduOS.bin
@@ -28,7 +38,7 @@ clean:
 	@rm -fr build
 
 run: $(moduOS)
-	qemu-system-arm -M realview-pb-a8 -kernel $(moduOS)
+	qemu-system-arm -M realview-pb-a8 -kernel $(moduOS) -nographic
 
 debug: $(moduOS)
 	qemu-system-arm -M realview-pb-a8 -kernel $(moduOS) -S -gdb tcp::1234,ipv4
@@ -40,10 +50,10 @@ $(moduOS): $(ASM_OBJS) $(C_OBJS) $(LINKER_SCRIPT)
 	$(LD) -n -T $(LINKER_SCRIPT) -o $(moduOS) $(ASM_OBJS) $(C_OBJS) -Map=$(MAP_FILE)
 	$(OC) -O binary $(moduOS) $(moduOS_bin)
 
-build/%.os: $(ASM_SRCS) 
+build/%.os: %.S 
 	mkdir -p $(shell dirname $@)
-	$(CC) -march=$(ARCH) -mcpu=$(MCPU) -I$(INC_DIRS) -c -g -o $@ $<
+	$(CC) -march=$(ARCH) -mcpu=$(MCPU) $(INC_DIRS) $(CFLAGS) -o $@ $<
 
-build/%.o: $(C_SRCS) 
+build/%.o: %.c 
 	mkdir -p $(shell dirname $@)
-	$(CC) -march=$(ARCH) -mcpu=$(MCPU) -I$(INC_DIRS) -c -g -o $@ $<
+	$(CC) -march=$(ARCH) -mcpu=$(MCPU) $(INC_DIRS) $(CFLAGS) -o $@ $<
